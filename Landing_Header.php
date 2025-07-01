@@ -23,7 +23,7 @@
                 <a href = "./About_Page.php" class = "nav-link"> About Us </a>
                 <span class = "separator"> | </span>
                 <a href = "./Learn_More_Page.php" class = "nav-link"> Learn More </a>
-                <span class = "separator"> | </span>
+                <span class = "separator"> | </span>    
                 <a href = "./client_Side/login_form.php" class = "nav-link"> Log In </a> 
                 <span class = "separator"> | </span>
                 <a href = "./client_side/Registration.php" class = "nav-link"> Sign Up  </a>

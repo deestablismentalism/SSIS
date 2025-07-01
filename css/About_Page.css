@@ -67,7 +67,7 @@
     transform: translateX(-50%); /* Center the underline relative to its own width */
 }
 
-/** CSS for the image gallery */
+/** CSS for the image gallery 
 .wrapper{
     display: flex;
     align-items: center;
