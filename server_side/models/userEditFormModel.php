@@ -90,6 +90,14 @@ class userEditFormModel {
     public function updateEnrolleeData($enrolleeId, $data) {
         try {
             $this->conn->beginTransaction();
+            error_log("Starting transaction for enrollee ID: " . $enrolleeId);
+
+            // Convert and validate LRN and PSA numbers
+            $lrn = !empty($data['lrn']) ? filter_var($data['lrn'], FILTER_VALIDATE_INT) : null;
+            $psa = !empty($data['psa']) ? filter_var($data['psa'], FILTER_VALIDATE_INT) : null;
+
+            error_log("Converted LRN: " . var_export($lrn, true));
+            error_log("Converted PSA: " . var_export($psa, true));
 
             // 1. Update enrollee table
             $enrolleeSQL = "UPDATE enrollee SET 
@@ -110,13 +118,13 @@ class userEditFormModel {
                 WHERE Enrollee_ID = :enrolleeId";
 
             $enrolleeStmt = $this->conn->prepare($enrolleeSQL);
-            $enrolleeStmt->execute([
+            $enrolleeResult = $enrolleeStmt->execute([
                 ':firstName' => $data['first_name'],
                 ':lastName' => $data['last_name'],
                 ':middleName' => $data['middle_name'],
                 ':extension' => $data['extension'],
-                ':lrn' => $data['lrn'],
-                ':psa' => $data['psa'],
+                ':lrn' => $lrn,
+                ':psa' => $psa,
                 ':age' => $data['age'],
                 ':birthdate' => $data['birthdate'],
                 ':sex' => $data['sex'],
@@ -128,6 +136,12 @@ class userEditFormModel {
                 ':enrolleeId' => $enrolleeId
             ]);
 
+            if (!$enrolleeResult) {
+                error_log("Failed to update enrollee table: " . json_encode($enrolleeStmt->errorInfo()));
+                throw new PDOException("Failed to update enrollee table");
+            }
+            error_log("Successfully updated enrollee table");
+
             // 2. Update educational_information table
             $eduInfoSQL = "UPDATE educational_information ei 
                 JOIN enrollee e ON e.Educational_Information_ID = ei.Educational_Information_ID
@@ -138,12 +152,18 @@ class userEditFormModel {
                 WHERE e.Enrollee_ID = :enrolleeId";
 
             $eduInfoStmt = $this->conn->prepare($eduInfoSQL);
-            $eduInfoStmt->execute([
+            $eduInfoResult = $eduInfoStmt->execute([
                 ':enrollingGrade' => $data['enrolling_grade_level'],
                 ':lastGrade' => $data['last_grade_level'],
                 ':lastYear' => $data['last_year_attended'],
                 ':enrolleeId' => $enrolleeId
             ]);
+
+            if (!$eduInfoResult) {
+                error_log("Failed to update educational_information table: " . json_encode($eduInfoStmt->errorInfo()));
+                throw new PDOException("Failed to update educational information");
+            }
+            error_log("Successfully updated educational_information table");
 
             // 3. Update educational_background table
             $eduBgSQL = "UPDATE educational_background eb 
@@ -156,13 +176,19 @@ class userEditFormModel {
                 WHERE e.Enrollee_ID = :enrolleeId";
 
             $eduBgStmt = $this->conn->prepare($eduBgSQL);
-            $eduBgStmt->execute([
+            $eduBgResult = $eduBgStmt->execute([
                 ':lastSchool' => $data['last_school_attended'],
                 ':schoolId' => $data['school_id'],
                 ':schoolAddress' => $data['school_address'],
                 ':schoolType' => $data['school_type'],
                 ':enrolleeId' => $enrolleeId
             ]);
+
+            if (!$eduBgResult) {
+                error_log("Failed to update educational_background table: " . json_encode($eduBgStmt->errorInfo()));
+                throw new PDOException("Failed to update educational background");
+            }
+            error_log("Successfully updated educational_background table");
 
             // 4. Update enrollee_address table
             $addressSQL = "UPDATE enrollee_address ea 
@@ -181,7 +207,7 @@ class userEditFormModel {
                 WHERE e.Enrollee_ID = :enrolleeId";
 
             $addressStmt = $this->conn->prepare($addressSQL);
-            $addressStmt->execute([
+            $addressResult = $addressStmt->execute([
                 ':region' => $data['region'],
                 ':regionName' => $data['region_name'],
                 ':province' => $data['province'],
@@ -195,6 +221,12 @@ class userEditFormModel {
                 ':enrolleeId' => $enrolleeId
             ]);
 
+            if (!$addressResult) {
+                error_log("Failed to update enrollee_address table: " . json_encode($addressStmt->errorInfo()));
+                throw new PDOException("Failed to update address information");
+            }
+            error_log("Successfully updated enrollee_address table");
+
             // 5. Update disabled_student table
             $disabledSQL = "UPDATE disabled_student ds 
                 JOIN enrollee e ON e.Disabled_Student_ID = ds.Disabled_Student_ID
@@ -206,7 +238,7 @@ class userEditFormModel {
                 WHERE e.Enrollee_ID = :enrolleeId";
 
             $disabledStmt = $this->conn->prepare($disabledSQL);
-            $disabledStmt->execute([
+            $disabledResult = $disabledStmt->execute([
                 ':hasSpecialCondition' => $data['has_a_special_condition'],
                 ':specialCondition' => $data['special_condition'],
                 ':hasAssistiveTech' => $data['has_assistive_technology'],
@@ -214,10 +246,18 @@ class userEditFormModel {
                 ':enrolleeId' => $enrolleeId
             ]);
 
+            if (!$disabledResult) {
+                error_log("Failed to update disabled_student table: " . json_encode($disabledStmt->errorInfo()));
+                throw new PDOException("Failed to update disability information");
+            }
+            error_log("Successfully updated disabled_student table");
+
             // Update parent information
             foreach (['father', 'mother', 'guardian'] as $relationship) {
                 if (isset($data['parent_information'][$relationship])) {
                     $parentInfo = $data['parent_information'][$relationship];
+                    error_log("Processing " . $relationship . " information: " . json_encode($parentInfo));
+                    
                     $parentSQL = "UPDATE parent_information pi
                                 JOIN enrollee_parents ep ON pi.Parent_Id = ep.Parent_Id
                                 SET 
@@ -231,7 +271,7 @@ class userEditFormModel {
                                 AND ep.Relationship = :relationship";
 
                     $parentStmt = $this->conn->prepare($parentSQL);
-                    $parentStmt->execute([
+                    $parentResult = $parentStmt->execute([
                         ':firstName' => $parentInfo['first_name'],
                         ':middleName' => $parentInfo['middle_name'],
                         ':lastName' => $parentInfo['last_name'],
@@ -241,13 +281,84 @@ class userEditFormModel {
                         ':enrolleeId' => $enrolleeId,
                         ':relationship' => ucfirst($relationship)
                     ]);
+
+                    if (!$parentResult) {
+                        error_log("Failed to update " . $relationship . " information: " . json_encode($parentStmt->errorInfo()));
+                        throw new PDOException("Failed to update " . $relationship . " information");
+                    }
+                    error_log("Successfully updated " . $relationship . " information");
                 }
             }
-            $this->conn->commit();
-            $this->setResubmitStatus($enrolleeId);
-            return ['success' => true, 'message' => 'Enrollment data updated successfully'];
 
+            // Handle PSA image update if present
+            if (isset($data['psa_image'])) {
+                error_log("Processing PSA image update: " . json_encode($data['psa_image']));
+                
+                // Get the current PSA image ID if any
+                $currentPsaSQL = "SELECT Psa_Image_Id FROM enrollee WHERE Enrollee_ID = :enrolleeId";
+                $currentPsaStmt = $this->conn->prepare($currentPsaSQL);
+                $currentPsaStmt->execute([':enrolleeId' => $enrolleeId]);
+                $currentPsaId = $currentPsaStmt->fetchColumn();
+                
+                error_log("Current PSA Image ID: " . var_export($currentPsaId, true));
+
+                // First insert into Psa_directory
+                $psaSQL = "INSERT INTO Psa_directory (filename, directory) VALUES (:filename, :directory)";
+                $psaStmt = $this->conn->prepare($psaSQL);
+                $psaResult = $psaStmt->execute([
+                    ':filename' => $data['psa_image']['filename'],
+                    ':directory' => $data['psa_image']['filepath']
+                ]);
+
+                if (!$psaResult) {
+                    error_log("Failed to insert PSA directory record: " . json_encode($psaStmt->errorInfo()));
+                    throw new PDOException("Failed to update PSA image directory");
+                }
+                
+                // Get the new PSA image ID
+                $newPsaImageId = $this->conn->lastInsertId();
+                error_log("New PSA Image ID: " . $newPsaImageId);
+                
+                // Update the enrollee table with the new PSA image ID
+                $updatePsaSQL = "UPDATE enrollee SET Psa_Image_Id = :psaImageId WHERE Enrollee_ID = :enrolleeId";
+                $updatePsaStmt = $this->conn->prepare($updatePsaSQL);
+                $updatePsaResult = $updatePsaStmt->execute([
+                    ':psaImageId' => $newPsaImageId,
+                    ':enrolleeId' => $enrolleeId
+                ]);
+
+                if (!$updatePsaResult) {
+                    error_log("Failed to update enrollee PSA image ID: " . json_encode($updatePsaStmt->errorInfo()));
+                    throw new PDOException("Failed to update enrollee PSA image reference");
+                }
+                error_log("Successfully updated PSA image information");
+
+                // Delete the old PSA directory entry if it exists
+                if ($currentPsaId) {
+                    $deletePsaSQL = "DELETE FROM Psa_directory WHERE Psa_Image_Id = :oldPsaId";
+                    $deletePsaStmt = $this->conn->prepare($deletePsaSQL);
+                    $deletePsaResult = $deletePsaStmt->execute([':oldPsaId' => $currentPsaId]);
+                    
+                    if (!$deletePsaResult) {
+                        error_log("Warning: Failed to delete old PSA directory entry: " . json_encode($deletePsaStmt->errorInfo()));
+                    } else {
+                        error_log("Successfully deleted old PSA directory entry");
+                    }
+                }
+            }
+
+            $this->conn->commit();
+            error_log("Successfully committed all changes");
+            
+            $resubmitResult = $this->setResubmitStatus($enrolleeId);
+            if (!$resubmitResult['success']) {
+                error_log("Warning: Failed to set resubmit status: " . json_encode($resubmitResult));
+            }
+            
+            return ['success' => true, 'message' => 'Enrollment data updated successfully'];
         } catch (PDOException $e) {
+            error_log("Error in updateEnrolleeData: " . $e->getMessage());
+            error_log("Rolling back transaction");
             $this->conn->rollBack();
             return ['success' => false, 'error' => $e->getMessage()];
         }
@@ -267,6 +378,25 @@ class userEditFormModel {
             return $stmt->fetch(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             return null;
+        }
+    }
+
+    public function testSingleUpdate($enrolleeId, $firstName) {
+        try {
+            $sql = "UPDATE enrollee SET Student_First_Name = :firstName WHERE Enrollee_ID = :enrolleeId";
+            $stmt = $this->conn->prepare($sql);
+            $result = $stmt->execute([
+                ':firstName' => $firstName,
+                ':enrolleeId' => $enrolleeId
+            ]);
+            
+            error_log("Test update result: " . ($result ? "success" : "failed"));
+            error_log("Test update error info: " . json_encode($stmt->errorInfo()));
+            
+            return ['success' => $result, 'message' => $result ? 'Test update successful' : 'Test update failed'];
+        } catch (PDOException $e) {
+            error_log("Test update error: " . $e->getMessage());
+            return ['success' => false, 'error' => $e->getMessage()];
         }
     }
 }

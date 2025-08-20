@@ -24,12 +24,13 @@ class studentsModel {
     public function insertEnrolleeToStudent($enrolleeId) {
         try {
             $this->conn->beginTransaction();
+            $initialStatus = 1;
             $gradeLevel = $this->getEnrollingGradeLevel($enrolleeId);
-            $sql = "INSERT INTO students(Enrollee_Id, Grade_Level_Id) VALUES(:enrollee_id, :grade_level)";
+            $sql = "INSERT INTO students(Enrollee_Id, Grade_Level_Id, Student_Status) VALUES(:enrollee_id, :grade_level, :initial_status)";
             $stmt = $this->conn->prepare($sql);
             $stmt->bindParam(':enrollee_id', $enrolleeId);
             $stmt->bindParam(':grade_level', $gradeLevel);
-
+            $stmt->bindParam(':initial_status', $initialStatus);
             if($stmt->execute()) {
                 $this->conn->commit();
                 return ['success'=> true, 'message'=> 'query executed'];

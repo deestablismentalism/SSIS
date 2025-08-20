@@ -1,5 +1,5 @@
 <?php
-    require_once '../server_side/dbconnection.php';
+    require_once '../server_side/core/dbconnection.php';
     class getTeachers {
         protected $conn;
     

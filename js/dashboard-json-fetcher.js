@@ -122,6 +122,13 @@ document.addEventListener('DOMContentLoaded', function(){
                 plugins: {
                     legend: {
                         position: 'top'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Student Status Distribution',
+                        font: {
+                            size: 16
+                        }
                     }
                 }
             }
@@ -151,6 +158,13 @@ document.addEventListener('DOMContentLoaded', function(){
                 plugins: {
                     legend: {
                         position: 'top'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Enrollment Status Distribution',
+                        font: {
+                            size: 16
+                        }
                     }
                 }
             }
@@ -176,6 +190,13 @@ document.addEventListener('DOMContentLoaded', function(){
                 plugins: {
                     legend: {
                         position: 'top'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Enrollee Grade Level Distribution',
+                        font: {
+                            size: 16
+                        }
                     }
                 }
             }
@@ -203,6 +224,13 @@ document.addEventListener('DOMContentLoaded', function(){
                 plugins: {
                     legend: {
                         position: 'top'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Enrollee Biological Sex Distribution',
+                        font: {
+                            size: 16
+                        }
                     }
                 }
             }
@@ -229,6 +257,13 @@ document.addEventListener('DOMContentLoaded', function(){
                 plugins: {
                     legend: {
                         position: 'top'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Student Grade Level Distribution',
+                        font: {
+                            size: 16
+                        }
                     }
                 }
             }
@@ -256,6 +291,13 @@ document.addEventListener('DOMContentLoaded', function(){
                 plugins: {
                     legend: {
                         position: 'top'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Student Biological Sex Distribution',
+                        font: {
+                            size: 16
+                        }
                     }
                 }
             }

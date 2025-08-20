@@ -14,7 +14,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     $status = (int)$_POST['status'] ?? null;
 
     // Define valid status codes
-    $validStatuses = [1, 2, 3, 4];
+    $validStatuses = [1, 2];
 
     if($enrolleeId && in_array($status, $validStatuses)) {
         $update = $updateStatus->updateEnrollee($enrolleeId, $status);
@@ -29,6 +29,10 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                 echo json_encode(['success' => false, 'message'=> 'inserting enrollee failed']);
                 exit();
             }
+        }
+        else if($update && $status === 2) {
+            echo json_encode(['success' => true, 'message'=> "Denied Enrollee"]);
+            exit();
         }
         echo json_encode(['success' => true, 'message'=> "Update successful"]);
         exit();

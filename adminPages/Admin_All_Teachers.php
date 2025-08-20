@@ -15,7 +15,7 @@
                 <p class="all-teachers-title">All Teachers</p>
                 <table class="table-teachers">
                     <?php
-                        require_once '../server_side/adminTeacherView.php';
+                        require_once '../server_side/admin/adminTeacherView.php';
                         $table = new DisplayTeachersView();
                         $table->displayAllTeachers();
                     ?>

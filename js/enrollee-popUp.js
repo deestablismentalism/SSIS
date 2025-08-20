@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', function (){
             else {
                 alert('unrecognized action');
             }
-            fetch('../server_side/admin/adminUpdateEnrolleeStatus.php', {
+            fetch('../server_side/admin/updateEnrolleeStatus.php', {
                 method: 'POST',
                 headers: {
                     'Content-type': 'application/x-www-form-urlencoded',

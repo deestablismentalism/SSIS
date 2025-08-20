@@ -11,9 +11,7 @@
         include '../adminPages/admin_base_designs.php'; 
     ?>
 
-        <!--START OF THE MAIN CONTENT-->
-        <div class="content">
-                
+        <!--START OF THE MAIN CONTENT-->      
             <div class="enrollee-data-wrapper">
                 <div class="dashboard-hyperlinks">
                     <a href="Admin_All_Enrollees.php" class="all-hyperlinks-wrapper"> 

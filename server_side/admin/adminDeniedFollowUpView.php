@@ -40,7 +40,7 @@ class AdminDeniedFollowUpView {
                 <td>' .$row['Transaction_Code'].'</td>
                 <td>' .$status.'</td>
                 <td>' .$row['Created_At'].'</td>
-                <td> ' .$viewSubmission. ' <button id="' .$row['Enrollee_Id'].'" data-id="' .$row['Enrollee_Id'].'">View Reason</button> </td>
+                <td> ' .$viewSubmission. ' <button id="' .$row['Enrollee_Id'].'" data-id="' .$row['Enrollee_Id'].'" class="view-reason">View Reason</button> </td>
             </tr>';
         }
     }

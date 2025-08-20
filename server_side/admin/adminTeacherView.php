@@ -1,5 +1,5 @@
 <?php
-    require_once '../server_side/adminTeacherModel.php';
+    require_once '../server_side/models/adminTeacherModel.php';
     
     class DisplayTeachersView {
         protected $displayTeachers;

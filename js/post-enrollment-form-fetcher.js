@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Force validation of all sections
         const validateAllFields = () => {
-
             const allInputs = form.querySelectorAll('input:not([type="radio"]), select, textarea');
             // Clear any existing error states first
             allInputs.forEach(input => {
@@ -20,6 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
             });
+            
             // Create validation events
             const blurEvent = new Event('blur', { bubbles: true });
             const changeEvent = new Event('change', { bubbles: true });
@@ -34,11 +34,21 @@ document.addEventListener('DOMContentLoaded', function() {
                     input.dispatchEvent(inputEvent);
                 }
             });
+
             // Explicitly call each section's validation function
             const studentInfoValid = window.validateStudentInfo ? validateStudentInfo() : true;
             const parentInfoValid = window.validateParentInfo ? validateParentInfo() : true;
             const previousSchoolValid = window.validatePreviousSchoolInfo ? validatePreviousSchoolInfo() : true;
             const addressInfoValid = window.validateAddressInfo ? validateAddressInfo() : true;
+
+            // Log validation results for debugging
+            console.log('Validation Results:', {
+                studentInfo: studentInfoValid,
+                parentInfo: parentInfoValid,
+                previousSchool: previousSchoolValid,
+                addressInfo: addressInfoValid,
+                globalState: ValidationUtils.validationState
+            });
 
             // Find all error messages that are currently shown
             const errorMessages = document.querySelectorAll('.error-msg.show');
@@ -58,16 +68,27 @@ document.addEventListener('DOMContentLoaded', function() {
             
             return studentInfoValid && parentInfoValid && previousSchoolValid && addressInfoValid;
         };
-        const isFormValid = ValidationUtils.isFormValid();
+
+        // Run validations and check results
         const areFieldsValid = validateAllFields();
+        const isFormValid = ValidationUtils.isFormValid();
+
+        console.log('Final Form Validation:', {
+            areFieldsValid,
+            isFormValid,
+            validationState: ValidationUtils.validationState
+        });
 
         // Check if all validations pass
-        if (!isFormValid || !areFieldsValid) {
+        if (!areFieldsValid || !isFormValid) {
             const errorMessage = document.getElementById('error-message');
             if (errorMessage) {
                 errorMessage.style.display = 'block';
-                errorMessage.innerHTML = 'Please correct the errors in the form before submitting.';
-
+                if (!areFieldsValid) {
+                    errorMessage.innerHTML = 'Please fill in all required fields correctly.';
+                } else if (!isFormValid) {
+                    errorMessage.innerHTML = 'Please ensure all sections are properly filled out.';
+                }
                 setTimeout(() => {
                     errorMessage.style.display = 'none';
                 }, 5000);

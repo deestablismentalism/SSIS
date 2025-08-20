@@ -1,6 +1,5 @@
-.content {
-    font-family: 'Barlow';
-    height: 100%;
+h1 {
+    font-family: var(--main-fonts);
 }
 .data-title {
     font-weight: bold;

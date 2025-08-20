@@ -12,8 +12,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 // Get POST data
 $postData = json_decode(file_get_contents('php://input'), true);
 
-// Debug: Log the received data
-error_log('Received POST data: ' . print_r($postData, true));
+// Debug: Log specific fields we're having issues with
+error_log('LRN value received: ' . ($postData['lrn'] ?? 'not set'));
+error_log('PSA value received: ' . ($postData['psa'] ?? 'not set'));
+error_log('PSA image data received: ' . (isset($postData['psa_image']) ? 'yes' : 'no'));
 
 if (!isset($postData['enrolleeId'])) {
     echo json_encode(['success' => false, 'error' => 'Enrollee ID is required']);
@@ -50,6 +52,12 @@ if (isset($postData['psa_image'])) {
         if ($oldImageData && isset($oldImageData['filepath']) && file_exists($oldImageData['filepath'])) {
             unlink($oldImageData['filepath']);
         }
+
+        // Add PSA image data to formData
+        $formData['psa_image'] = [
+            'filename' => $filename,
+            'filepath' => $filepath
+        ];
     } else {
         echo json_encode(['success' => false, 'error' => 'Failed to save image']);
         exit();
@@ -62,8 +70,8 @@ $formData = [
     'last_name' => $postData['last_name'] ?? '',
     'middle_name' => $postData['middle_name'] ?? '',
     'extension' => $postData['extension'] ?? '',
-    'lrn' => $postData['lrn'] ?? '',
-    'psa' => $postData['psa'] ?? '',
+    'lrn' => trim($postData['lrn'] ?? ''),  // Add trim to remove any whitespace
+    'psa' => trim($postData['psa'] ?? ''),  // Add trim to remove any whitespace
     'age' => $postData['age'] ?? '',
     'birthdate' => $postData['birthdate'] ?? '',
     'sex' => $postData['sex'] ?? '',
@@ -95,11 +103,6 @@ $formData = [
     'assistive_technology' => $postData['assistive_technology'] ?? ''
 ];
 
-// Add PSA image data if present
-if (isset($postData['psa_image_data'])) {
-    $formData['psa_image'] = $postData['psa_image_data'];
-}
-
 // Add parent information
 $formData['parent_information'] = [
     'father' => [
@@ -127,6 +130,9 @@ $formData['parent_information'] = [
         'if_4ps' => $postData['guardian_4ps_member'] ?? '0'
     ]
 ];
+
+// Log the final form data before processing
+error_log('Final form data before update: ' . print_r($formData, true));
 
 // Basic validation
 $requiredFields = ['first_name', 'last_name', 'lrn', 'birthdate', 'sex'];

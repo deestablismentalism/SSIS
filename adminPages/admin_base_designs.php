@@ -34,6 +34,7 @@ if (!isset($_SESSION['Admin']['User-Id']) || !isset($_SESSION['Admin']['Staff-Id
                     <img src="../imgs/student.svg" class="bi">
                     <span id="students-spn" class="menu-title">Students</span>
                     <button class="students-btn" onclick="studentsDrop()"><img src="../imgs/chevron-down.svg" class ="bi-chevron-down"></button>
+                </div>
                     <ul class="students-ul">
                         <li>
                             <a href="./Admin_All_Students.php" class="allStudents">All Students</a>
@@ -45,26 +46,28 @@ if (!isset($_SESSION['Admin']['User-Id']) || !isset($_SESSION['Admin']['Staff-Id
                             <a href="./Admin_Sections.php" class="studentInfo"> Add Section</a>
                         </li>
                     </ul>
-                </div>
+                
 
                 <!--TEACHERS-->
                 <div class="menu border-100sb" id="teachers">
                     <img src="../imgs/teachers.svg" class="bi">
                     <span id="teachers-spn" class="menu-title">Teachers</span>
                     <button class="teachers-btn" onclick="teachersDrop()"><img src="../imgs/chevron-down.svg" class ="bi-chevron-down"></button>
+                </div>
+                   
                     <ul class="teachers-ul">
                         <li>
                             <a href="../adminPages/Admin_All_Teachers.php" class="allTeachers">All Teachers</a>
                         </li>
-
                     </ul>
-                </div>
+               
 
                 <!--ENROLLS-->
                 <div class="menu border-100sb" id="enrolls">
                     <img src="../imgs/enrolls.svg" class="bi">
                     <span id="enrolls-spn" class="menu-title">Enrolls</span>
                     <button class="enrolls-btn" onclick="enrollsDrop()"><img src="../imgs/chevron-down.svg" class ="bi-chevron-down"></button>
+                </div>
                     <ul class="enrolls-ul">
                         <li>
                             <a href="./Admin_All_Enrollees.php" class="enrolled">All Enrollees</a>
@@ -76,7 +79,6 @@ if (!isset($_SESSION['Admin']['User-Id']) || !isset($_SESSION['Admin']['Staff-Id
                             <a href="./Admin_Denied_FollowUp.php"> Denied & To follow </a>
                         </li>
                     </ul>
-                </div>
             </div>
         </div>
     </div>
@@ -137,7 +139,5 @@ if (!isset($_SESSION['Admin']['User-Id']) || !isset($_SESSION['Admin']['Staff-Id
             </div>
         </div>
         <!--END OF HEADER-->
-
-</body>
-</html>
+        <div class="content">
 

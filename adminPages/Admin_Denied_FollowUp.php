@@ -42,6 +42,5 @@
       </div>
   </div>
 </body>
-<script src = "../js/Denied-FollowUp-PopUp.js"></script>
 <script src = "../js/admin-denied-followup.js"></script>
 </html>

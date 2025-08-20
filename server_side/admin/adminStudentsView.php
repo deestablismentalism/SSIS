@@ -17,6 +17,7 @@ class adminStudentsView {
         foreach($data as $rows) {
             $section = $rows['Section_Name'] === null ? 'Section is not set' : htmlspecialchars($rows['Section_Name']);
             $middleInitial = $rows['Student_Middle_Name'] === null ? '' : substr($rows['Student_Middle_Name'], 0, 1) . ".";
+            $lrn = $rows['Learner_Reference_Number'] === 0 ? 'LRN is not set' : $rows['Learner_Reference_Number'];
             
             // Convert status number to text
             $statusText = '';
@@ -39,7 +40,7 @@ class adminStudentsView {
                 htmlspecialchars($rows['Student_First_Name']) .' '.
                 $middleInitial .
                 '</td>
-                <td>' .$rows['Learner_Reference_Number'].' </td>
+                <td>' .$lrn. ' </td>
                 <td>' . htmlspecialchars($rows['Grade_Level']).' </td>
                 <td> ' . $section .'</td>
                 <td>' .htmlspecialchars($rows['Student_Email']) .' </td>

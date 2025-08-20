@@ -54,10 +54,10 @@ const ValidationUtils = {
     },
     // Central validation state tracker
     validationState: {
-        studentInfo: false,
-        parentInfo: false,
-        addressInfo: false,
-        previousSchool: false
+        studentInfo: true,
+        parentInfo: true,
+        addressInfo: true,
+        previousSchool: true
     },
 
     // Method to check if all validations pass

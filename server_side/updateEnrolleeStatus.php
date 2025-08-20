@@ -1,8 +1,8 @@
 <?php
 
 declare(strict_types=1);
-require_once __DIR__ . '/../models/EnrolleesModel.php';
-require_once __DIR__ . '/../models/studentsModel.php';
+require_once __DIR__ . '/../server_side/EnrolleesModel.php';
+require_once __DIR__ . '/../server_side/studentsModel.php';
 
 header("Content-Type: application/json");
 if($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -13,28 +13,23 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     $enrolleeId = $_POST['id'] ?? null;
     $status = (int)$_POST['status'] ?? null;
 
-    // Define valid status codes
-    $validStatuses = [1, 2, 3, 4];
-
-    if($enrolleeId && in_array($status, $validStatuses)) {
+    if($enrolleeId && $status && $status === 1) {
         $update = $updateStatus->updateEnrollee($enrolleeId, $status);
-        // Only attempt to insert into students table if status is 1 (Enrolled)
-        if($update && $status === 1) {
+        if($update) {
             $insert = $students->insertEnrolleeToStudent($enrolleeId);
             if($insert) {
                 echo json_encode($insert);
                 exit();
             }
-            else {
-                echo json_encode(['success' => false, 'message'=> 'inserting enrollee failed']);
-                exit();
-            }
+        else {
+            echo json_encode(['success' => false, 'message'=> 'inserting enrollee failed']);
         }
-        echo json_encode(['success' => true, 'message'=> "Update successful"]);
+        }
+        echo json_encode(['success' => true, 'message'=> "Insert successful"]);
         exit();
     }
     else {
-        echo json_encode(['success' => false, 'message' => 'Invalid input: enrolleeId or status is invalid']);
+        echo json_encode(['success' => false, 'message' => 'Invalid input']);
         exit();
     }
 

@@ -13,25 +13,73 @@ class EnrollmentForm {
     // Insert educational information function
     public function educational_information($School_Year_Start, $School_Year_End, $If_LRNN_Returning, $Enrolling_Grade_Level, $Last_Grade_Level, $Last_Year_Attended) {
         try {
-            $sql_educational_information = "INSERT INTO educational_information (School_Year_Start, School_Year_End, 
-                                            If_LRNN_Returning, Enrolling_Grade_Level, Last_Grade_Level, Last_Year_Attended)
-                                            VALUES (:School_Year_Start, :School_Year_End, :If_LRNN_Returning, :Enrolling_Grade_Level,
-                                            :Last_Grade_Level, :Last_Year_Attended)";
-            $insert_educational_information = $this->conn->prepare($sql_educational_information);
-            $insert_educational_information->bindParam(':School_Year_Start', $School_Year_Start);
-            $insert_educational_information->bindParam(':School_Year_End', $School_Year_End);
-            $insert_educational_information->bindParam(':If_LRNN_Returning', $If_LRNN_Returning);
-            $insert_educational_information->bindParam(':Enrolling_Grade_Level', $Enrolling_Grade_Level);
-            $insert_educational_information->bindParam(':Last_Grade_Level', $Last_Grade_Level);
-            $insert_educational_information->bindParam(':Last_Year_Attended', $Last_Year_Attended);
-            if ($insert_educational_information->execute()) {
-                return $this->conn->lastInsertId(); 
-            } else {
-                return ['status' => 'error', 'message' => 'failed to insert educational information'];
+            // Validate required fields
+            if (empty($School_Year_Start) || empty($School_Year_End)) {
+                throw new PDOException('School year start and end are required');
             }
+
+            if (empty($Enrolling_Grade_Level)) {
+                throw new PDOException('Enrolling grade level is required');
+            }
+
+            // Type casting and validation
+            $School_Year_Start = filter_var($School_Year_Start, FILTER_VALIDATE_INT);
+            $School_Year_End = filter_var($School_Year_End, FILTER_VALIDATE_INT);
+            $Last_Year_Attended = !empty($Last_Year_Attended) ? filter_var($Last_Year_Attended, FILTER_VALIDATE_INT) : null;
+            
+            // Additional validation
+            if ($School_Year_Start === false || $School_Year_End === false) {
+                throw new PDOException('Invalid school year format');
+            }
+
+            if ($School_Year_Start >= $School_Year_End) {
+                throw new PDOException('School year start must be less than school year end');
+            }
+
+            // Prepare and execute query with validated data
+            $sql_educational_information = "INSERT INTO educational_information (
+                School_Year_Start, 
+                School_Year_End, 
+                If_LRN_Returning, 
+                Enrolling_Grade_Level, 
+                Last_Grade_Level, 
+                Last_Year_Attended
+            ) VALUES (
+                :School_Year_Start, 
+                :School_Year_End, 
+                :If_LRN_Returning, 
+                :Enrolling_Grade_Level,
+                :Last_Grade_Level, 
+                :Last_Year_Attended
+            )";
+
+            $insert_educational_information = $this->conn->prepare($sql_educational_information);
+            
+            // Bind parameters with explicit types
+            $insert_educational_information->bindValue(':School_Year_Start', $School_Year_Start, PDO::PARAM_INT);
+            $insert_educational_information->bindValue(':School_Year_End', $School_Year_End, PDO::PARAM_INT);
+            $insert_educational_information->bindValue(':If_LRN_Returning', $If_LRNN_Returning, PDO::PARAM_STR);
+            $insert_educational_information->bindValue(':Enrolling_Grade_Level', $Enrolling_Grade_Level, PDO::PARAM_STR);
+            $insert_educational_information->bindValue(':Last_Grade_Level', $Last_Grade_Level ?: null, PDO::PARAM_STR);
+            $insert_educational_information->bindValue(':Last_Year_Attended', $Last_Year_Attended, $Last_Year_Attended === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
+            
+            // Execute and check for errors
+            if (!$insert_educational_information->execute()) {
+                $errorInfo = $insert_educational_information->errorInfo();
+                error_log('SQL Error: ' . json_encode($errorInfo));
+                throw new PDOException('Failed to insert educational information: ' . $errorInfo[2]);
+            }
+            
+            $lastId = $this->conn->lastInsertId();
+            if (!$lastId) {
+                throw new PDOException('Failed to get last insert ID for educational information');
+            }
+            
+            return $lastId;
         }
-        catch (PDOException $e){
-            return ['status' => 'error', 'message' => 'educational information query failed: ' .$e->getMessage()];
+        catch (PDOException $e) {
+            error_log('Educational information query failed: ' . $e->getMessage());
+            throw new PDOException($e->getMessage());
         }
     }
 
